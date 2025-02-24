@@ -17,14 +17,14 @@ void main() {
 }
 
 // Define fixed window size for desktop
-const double windowWidth = 360;
-const double windowHeight = 640;
+const double windowWidth = 720;
+const double windowHeight = 1280;
 
 // Setup window size and position for desktop platforms
 void setupWindow() {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     WidgetsFlutterBinding.ensureInitialized();
-    setWindowTitle('Age Counter with Milestones');
+    setWindowTitle('Age Counter');
     setWindowMinSize(const Size(windowWidth, windowHeight));
     setWindowMaxSize(const Size(windowWidth, windowHeight));
     getCurrentScreen().then((screen) {
@@ -79,11 +79,11 @@ class AgeCounter with ChangeNotifier {
   // Determine background color based on life stage
   Color getBackgroundColor() {
     if (age >= 0 && age <= 12) {
-      return Colors.yellow.shade200;
+      return Colors.lightBlue;
     } else if (age >= 13 && age <= 19) {
-      return Colors.blue.shade200;
+      return Colors.lightGreen;
     } else if (age >= 20 && age <= 30) {
-      return Colors.green.shade200;
+      return const Color.fromARGB(255, 251, 245, 190);
     } else if (age >= 31 && age <= 50) {
       return Colors.orange.shade200;
     } else {
@@ -118,7 +118,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Age Counter with Milestones',
+      title: 'Age Counter',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true, // Use Material Design 3
@@ -151,12 +151,8 @@ class MyHomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Display the label for age
-              const Text('Your age is:'),
+              Text('I am ${ageCounter.age} years old'),
               // Display the current age
-              Text(
-                '${ageCounter.age}',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
               const SizedBox(height: 10),
               // Display the corresponding life stage
               Text(
