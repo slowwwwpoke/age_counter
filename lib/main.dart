@@ -5,10 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 
 void main() {
-  // Set up the window size for desktop platforms
   setupWindow();
   runApp(
-    // Provide the AgeCounter model to all widgets within the app.
     ChangeNotifierProvider(
       create: (context) => AgeCounter(),
       child: const MyApp(),
@@ -16,11 +14,9 @@ void main() {
   );
 }
 
-// Define fixed window size for desktop
 const double windowWidth = 720;
 const double windowHeight = 1280;
 
-// Setup window size and position for desktop platforms
 void setupWindow() {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -37,22 +33,16 @@ void setupWindow() {
   }
 }
 
-/// Model to manage age state
-///
-/// [ChangeNotifier] is used to notify listeners when the state changes.
-/// The AgeCounter model keeps track of the user's age and determines the life stage.
 class AgeCounter with ChangeNotifier {
-  int age = 0; // Initialize age to 0
-  String _currentLifeStage = 'Childhood'; // Track current life stage
+  int age = 0;
+  String _currentLifeStage = 'Childhood';
 
-  // Increment age by 1 and notify listeners to rebuild widgets
   void increment(BuildContext context) {
     age += 1;
     _checkMilestone(context);
     notifyListeners();
   }
 
-  // Decrement age by 1 but ensure it doesn't go below 0
   void decrement(BuildContext context) {
     if (age > 0) {
       age -= 1;
@@ -61,7 +51,6 @@ class AgeCounter with ChangeNotifier {
     }
   }
 
-  // Determine life stage based on age
   String getLifeStage() {
     if (age >= 0 && age <= 12) {
       return 'Childhood';
@@ -76,7 +65,6 @@ class AgeCounter with ChangeNotifier {
     }
   }
 
-  // Determine background color based on life stage
   Color getBackgroundColor() {
     if (age >= 0 && age <= 12) {
       return Colors.lightBlue;
@@ -91,7 +79,6 @@ class AgeCounter with ChangeNotifier {
     }
   }
 
-  // Check if the life stage has changed and show a SnackBar if it has
   void _checkMilestone(BuildContext context) {
     String newLifeStage = getLifeStage();
     if (newLifeStage != _currentLifeStage) {
@@ -100,7 +87,6 @@ class AgeCounter with ChangeNotifier {
     }
   }
 
-  // Show a SnackBar popup for life stage milestone change
   void _showMilestonePopup(BuildContext context, String lifeStage) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -109,9 +95,14 @@ class AgeCounter with ChangeNotifier {
       ),
     );
   }
+
+  void updateAgeFromSlider(double newAge, BuildContext context) {
+    age = newAge.toInt();
+    _checkMilestone(context);
+    notifyListeners();
+  }
 }
 
-/// Root widget of the app
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -121,20 +112,18 @@ class MyApp extends StatelessWidget {
       title: 'Age Counter',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        useMaterial3: true, // Use Material Design 3
+        useMaterial3: true,
       ),
-      home: const MyHomePage(), // Main screen of the app
+      home: const MyHomePage(),
     );
   }
 }
 
-/// Main screen widget
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Access the AgeCounter model to get the life stage and background color
     var ageCounter = context.watch<AgeCounter>();
     var backgroundColor = ageCounter.getBackgroundColor();
     var lifeStage = ageCounter.getLifeStage();
@@ -143,41 +132,43 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Age Counter with Milestones'),
       ),
-      // Change background color based on life stage
       body: Container(
         color: backgroundColor,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Display the label for age
               Text('I am ${ageCounter.age} years old'),
-              // Display the current age
               const SizedBox(height: 10),
-              // Display the corresponding life stage
               Text(
                 'Life Stage: $lifeStage',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 20), // Add some spacing
-              // Row to display increment and decrement buttons
+              const SizedBox(height: 20),
+              Slider(
+                value: ageCounter.age.toDouble(),
+                min: 0,
+                max: 100,
+                divisions: 100,
+                label: '${ageCounter.age}',
+                onChanged: (double newAge) {
+                  ageCounter.updateAgeFromSlider(newAge, context);
+                },
+              ),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Button to decrement age
                   FloatingActionButton(
                     onPressed: () {
-                      // Decrement age and check milestone
                       context.read<AgeCounter>().decrement(context);
                     },
-                    tooltip: 'Decrement', // Tooltip for accessibility
+                    tooltip: 'Decrement',
                     child: const Icon(Icons.remove),
                   ),
-                  const SizedBox(width: 20), // Space between buttons
-                  // Button to increment age
+                  const SizedBox(width: 20),
                   FloatingActionButton(
                     onPressed: () {
-                      // Increment age and check milestone
                       context.read<AgeCounter>().increment(context);
                     },
                     tooltip: 'Increment',
