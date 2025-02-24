@@ -17,8 +17,8 @@ void main() {
 }
 
 // Define fixed window size for desktop
-const double windowWidth = 720;
-const double windowHeight = 1280;
+const double windowWidth = 360;
+const double windowHeight = 640;
 
 // Setup window size and position for desktop platforms
 void setupWindow() {
@@ -43,17 +43,20 @@ void setupWindow() {
 /// The AgeCounter model keeps track of the user's age and determines the life stage.
 class AgeCounter with ChangeNotifier {
   int age = 0; // Initialize age to 0
+  String _currentLifeStage = 'Childhood'; // Track current life stage
 
   // Increment age by 1 and notify listeners to rebuild widgets
-  void increment() {
+  void increment(BuildContext context) {
     age += 1;
+    _checkMilestone(context);
     notifyListeners();
   }
 
   // Decrement age by 1 but ensure it doesn't go below 0
-  void decrement() {
+  void decrement(BuildContext context) {
     if (age > 0) {
       age -= 1;
+      _checkMilestone(context);
       notifyListeners();
     }
   }
@@ -86,6 +89,25 @@ class AgeCounter with ChangeNotifier {
     } else {
       return Colors.grey.shade400;
     }
+  }
+
+  // Check if the life stage has changed and show a SnackBar if it has
+  void _checkMilestone(BuildContext context) {
+    String newLifeStage = getLifeStage();
+    if (newLifeStage != _currentLifeStage) {
+      _currentLifeStage = newLifeStage;
+      _showMilestonePopup(context, newLifeStage);
+    }
+  }
+
+  // Show a SnackBar popup for life stage milestone change
+  void _showMilestonePopup(BuildContext context, String lifeStage) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Milestone reached: $lifeStage'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 }
 
@@ -149,8 +171,8 @@ class MyHomePage extends StatelessWidget {
                   // Button to decrement age
                   FloatingActionButton(
                     onPressed: () {
-                      // Use context.read() to access AgeCounter outside of build
-                      context.read<AgeCounter>().decrement();
+                      // Decrement age and check milestone
+                      context.read<AgeCounter>().decrement(context);
                     },
                     tooltip: 'Decrement', // Tooltip for accessibility
                     child: const Icon(Icons.remove),
@@ -159,7 +181,8 @@ class MyHomePage extends StatelessWidget {
                   // Button to increment age
                   FloatingActionButton(
                     onPressed: () {
-                      context.read<AgeCounter>().increment();
+                      // Increment age and check milestone
+                      context.read<AgeCounter>().increment(context);
                     },
                     tooltip: 'Increment',
                     child: const Icon(Icons.add),
